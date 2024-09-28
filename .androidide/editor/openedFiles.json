@@ -1,20 +1,20 @@
 {
   "allFiles": [
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/My Application1/app/src/main/java/com/example/myapplication1/MainActivity.kt",
+      "file": "/storage/emulated/0/.projects/tv-navigation-drawer-example/.gitignore",
       "selection": {
         "end": {
-          "column": 49,
-          "index": 2364,
-          "line": 68
+          "column": 11,
+          "index": 1467,
+          "line": 86
         },
         "start": {
-          "column": 49,
-          "index": 2364,
-          "line": 68
+          "column": 11,
+          "index": 1467,
+          "line": 86
         }
       }
     }
   ],
-  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/My Application1/app/src/main/java/com/example/myapplication1/MainActivity.kt"
+  "selectedFile": "/storage/emulated/0/.projects/tv-navigation-drawer-example/.gitignore"
 }
