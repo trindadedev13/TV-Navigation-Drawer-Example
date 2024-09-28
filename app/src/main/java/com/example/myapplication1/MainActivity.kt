@@ -3,18 +3,22 @@ package com.example.myapplication1
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.tv.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material.icons.*
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.*
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.*
-import com.example.myapplication1.ui.theme.*
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import com.example.myapplication1.ui.theme.MyComposeApplicationTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
@@ -23,8 +27,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MyComposeApplicationTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     Screen()
                 }
@@ -36,7 +39,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Screen() {
-    var selectedIndex by remember { mutableIntStateOf(0) }
+    var selectedIndex by remember { mutableStateOf(0) }
 
     val items = listOf(
         "Home" to Icons.Default.Home,
@@ -44,13 +47,46 @@ fun Screen() {
         "Favorites" to Icons.Default.Favorite,
     )
 
-    ModalNavigationDrawer(
+    val focusRequesters = remember { items.map { FocusRequester() } }
+
+    NavigationDrawer(
         drawerContent = {
-            DrawerContent(
-                items = items,
-                selectedIndex = selectedIndex,
-                onItemSelected = { index -> selectedIndex = index }
-            )
+            Column(
+                Modifier
+                    .background(MaterialTheme.colorScheme.surface)
+                    .fillMaxHeight()
+                    .padding(12.dp)
+                    .selectableGroup(),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                items.forEachIndexed { index, item ->
+                    val (text, icon) = item
+
+                    NavigationDrawerItem(
+                        selected = selectedIndex == index,
+                        onClick = {
+                            selectedIndex = index
+                            focusRequesters[index].requestFocus()
+                        },
+                        leadingContent = {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                            )
+                        },
+                        modifier = Modifier
+                            .focusRequester(focusRequesters[index])
+                            .onFocusChanged { focusState ->
+                                if (focusState.isFocused && selectedIndex != index) {
+                                    selectedIndex = index
+                                }
+                            }
+                    ) {
+                        Text(text, modifier = Modifier.padding(start = 8.dp))
+                    }
+                }
+            }
         }
     ) {
         when (selectedIndex) {
@@ -59,43 +95,13 @@ fun Screen() {
             2 -> FavoritesScreen()
         }
     }
-}
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DrawerContent(
-    items: List<Pair<String, ImageVector>>,
-    selectedIndex: Int,
-    onItemSelected: (Int) -> Unit
-) {
-    Column(
-        Modifier
-            .background(MaterialTheme.colorScheme.surface)
-            .fillMaxHeight()
-            .padding(12.dp)
-            .selectableGroup(),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        items.forEachIndexed { index, item ->
-            val (text, icon) = item
-
-            NavigationDrawerItem(
-                label = { Text(text, modifier = Modifier.padding(start = 8.dp)) },
-                selected = selectedIndex == index,
-                onClick = { onItemSelected(index) },
-                icon = {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                    )
-                }
-            )
-        }
+    // Ensure the currently selected item is focused
+    LaunchedEffect(selectedIndex) {
+        focusRequesters[selectedIndex].requestFocus()
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen() {
     Column(
@@ -109,7 +115,6 @@ fun HomeScreen() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen() {
     Column(
@@ -123,7 +128,6 @@ fun SettingsScreen() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoritesScreen() {
     Column(
